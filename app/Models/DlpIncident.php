@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use AlizHarb\ActivityLog\Contracts\HasActivityLogTitle;
+use App\Services\DlpMaskingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,6 +24,27 @@ class DlpIncident extends Model implements HasActivityLogTitle
     protected $casts = [
         'occurred_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (DlpIncident $incident): void {
+            $policy = $incident->policy ?? DlpPolicy::find($incident->dlp_policy_id);
+
+            // Ensure masked_sample is stored in masked form
+            if (! empty($incident->masked_sample)) {
+                $incident->masked_sample = DlpMaskingService::maskSample($incident->masked_sample, $policy);
+            }
+
+            // Ensure full prompt content never contains raw unmasked secret keys
+            if (! empty($incident->prompt_content)) {
+                $incident->prompt_content = DlpMaskingService::maskPromptContent(
+                    $incident->prompt_content,
+                    $policy,
+                    $incident->masked_sample
+                );
+            }
+        });
+    }
 
     public function policy(): BelongsTo
     {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\DlpIncident;
 use App\Models\DlpPolicy;
+use App\Services\DlpMaskingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -36,8 +37,19 @@ class DlpController extends Controller
             'prompt_content' => 'nullable|string',
         ]);
 
+        $policy = DlpPolicy::find($validated['dlp_policy_id']);
+
+        $maskedSample = DlpMaskingService::maskSample($validated['masked_sample'] ?? null, $policy);
+        $promptContent = DlpMaskingService::maskPromptContent(
+            $validated['prompt_content'] ?? null,
+            $policy,
+            $maskedSample
+        );
+
         $incident = DlpIncident::create([
             ...$validated,
+            'masked_sample' => $maskedSample,
+            'prompt_content' => $promptContent,
             'client_ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'occurred_at' => now(),

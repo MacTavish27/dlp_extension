@@ -199,11 +199,11 @@ return [
                 'sortable' => true,
             ],
             'ip_address' => [
-                'visible' => true,
+                'visible' => false,
                 'searchable' => true,
             ],
             'user_agent' => [
-                'visible' => true,
+                'visible' => false,
                 'searchable' => false,
             ],
         ],
@@ -220,18 +220,18 @@ return [
             'ip_address' => true,
         ],
         'actions' => [
-            'timeline' => true,
+            'timeline' => false,
             'view' => true,
             'revert' => false,
             'restore' => false,
             'delete' => false,
-            'export' => true,
+            'export' => false,
             'prune' => false,
-            'retention_hold' => true,
+            'retention_hold' => false,
         ],
         'bulk_actions' => [
             'delete' => false,
-            'retention_hold' => true,
+            'retention_hold' => false,
         ],
     ],
 

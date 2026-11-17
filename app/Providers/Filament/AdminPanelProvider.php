@@ -10,7 +10,6 @@ use App\Filament\Widgets\LatestDlpIncidents;
 use App\Models\DlpIncident;
 use App\Models\DlpPolicy;
 use App\Models\User;
-use App\Support\BrowserDetector;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -126,13 +125,11 @@ class AdminPanelProvider extends PanelProvider
                                 });
                         }
 
-                        // 3. Format browser column to show detected browser + platform, with full user agent on hover
+                        // 3. Browser column displays the raw user agent string ($request->userAgent())
                         $browserColumn = $table->getColumn('properties.user_agent');
                         if ($browserColumn) {
                             $browserColumn
-                                ->label('Browser')
-                                ->formatStateUsing(fn ($state) => BrowserDetector::format($state))
-                                ->tooltip(fn ($state) => $state);
+                                ->label('Browser');
                         }
 
                         return $table;
