@@ -21,10 +21,8 @@ test('login event logs action as login with IP address and browser context', fun
         'email' => 'admin_test@example.com',
     ]);
 
-    // Clear user creation activity so we test login specifically
     Activity::query()->delete();
 
-    // Simulate login event
     event(new Login('web', $user, false));
 
     $log = Activity::where('event', 'login')->first();
@@ -52,7 +50,6 @@ test('updating remember token does not trigger a false updated activity log', fu
 test('logout event logs action as logout', function () {
     $user = User::factory()->create();
 
-    // Clear user creation activity
     Activity::query()->delete();
 
     event(new Logout('web', $user));

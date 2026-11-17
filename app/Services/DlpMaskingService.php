@@ -9,30 +9,18 @@ use App\Models\DlpPolicy;
 class DlpMaskingService
 {
     /**
-     * Common credential / API key regex patterns (defense-in-depth).
-     *
      * @var array<string, string>
      */
     protected static array $commonSecretPatterns = [
-        // AWS Access Key ID (e.g., AKIA...)
         'aws_access_key' => '/\b(AKIA[0-9A-Z]{16})\b/',
-        // AWS Secret Access Key (40 chars base64)
         'aws_secret_key' => '/(?i)\b(?:aws_secret_access_key|aws_secret|secret_key)[\s:=]+([0-9a-zA-Z\/+]{40})\b/',
-        // OpenAI / Anthropic API Keys (e.g., sk-...)
         'ai_api_key' => '/\b(sk-[a-zA-Z0-9_-]{20,})\b/',
-        // GitHub Personal Access Token / Fine-grained Token
         'github_token' => '/\b(gh[pousr]_[0-9a-zA-Z]{36,255})\b/',
-        // Slack API Token
         'slack_token' => '/\b(xox[baprs]-[0-9a-zA-Z]{10,48})\b/',
-        // Generic Bearer Token
         'bearer_token' => '/(?i)\bBearer\s+([a-zA-Z0-9_\-\.]{24,})\b/',
-        // Private Keys
         'private_key' => '/-----BEGIN [A-Z0-9 ]+PRIVATE KEY-----[\s\S]*?-----END [A-Z0-9 ]+PRIVATE KEY-----/',
     ];
 
-    /**
-     * Mask a secret token string, preserving non-sensitive prefix and suffix.
-     */
     public static function maskSecret(string $secret): string
     {
         $secret = trim($secret);
@@ -42,22 +30,18 @@ class DlpMaskingService
             return '';
         }
 
-        // If already heavily masked, don't re-mask
         if (static::isAlreadyMasked($secret)) {
             return $secret;
         }
 
-        // Very short strings (<= 4 chars)
         if ($length <= 4) {
             return str_repeat('*', $length);
         }
 
-        // Short strings (5 - 8 chars): keep first 1 and last 1
         if ($length <= 8) {
             return substr($secret, 0, 1).str_repeat('*', $length - 2).substr($secret, -1);
         }
 
-        // Determine prefix to keep for well-known key formats
         $keepStart = 2;
         if (str_starts_with($secret, 'AKIA') || str_starts_with($secret, 'ghp_') || str_starts_with($secret, 'sk-')) {
             $keepStart = 4;
@@ -69,22 +53,15 @@ class DlpMaskingService
         return substr($secret, 0, $keepStart).str_repeat('*', $maskLength).substr($secret, -$keepEnd);
     }
 
-    /**
-     * Check if a sample or string is already masked.
-     */
     public static function isAlreadyMasked(?string $value): bool
     {
         if (empty($value)) {
             return false;
         }
 
-        // Contains at least 3 asterisks
         return substr_count($value, '*') >= 3 || str_contains($value, '[REDACTED');
     }
 
-    /**
-     * Mask sensitive sample before storing in database.
-     */
     public static function maskSample(?string $sample, ?DlpPolicy $policy = null): ?string
     {
         if ($sample === null || $sample === '') {
@@ -98,9 +75,6 @@ class DlpMaskingService
         return static::maskSecret($sample);
     }
 
-    /**
-     * Mask secret keys inside full prompt content before storing in database.
-     */
     public static function maskPromptContent(?string $prompt, ?DlpPolicy $policy = null, ?string $sample = null): ?string
     {
         if ($prompt === null || $prompt === '') {
@@ -109,23 +83,19 @@ class DlpMaskingService
 
         $masked = $prompt;
 
-        // 1. If a specific unmasked sample was supplied, mask that exact string in the prompt
         if (! empty($sample) && ! static::isAlreadyMasked($sample)) {
             $maskedSecret = static::maskSecret($sample);
             $masked = str_replace($sample, $maskedSecret, $masked);
         }
 
-        // 2. If a masked sample was supplied (e.g. AK****************LE), find its unmasked counterpart in prompt
         if (! empty($sample) && static::isAlreadyMasked($sample)) {
             $masked = static::replaceMaskedSampleInPrompt($masked, $sample);
         }
 
-        // 3. Mask matches based on the violated policy
         if ($policy !== null) {
             $masked = static::maskUsingPolicy($masked, $policy);
         }
 
-        // 4. Defense-in-depth: Mask common known secret patterns (AWS, OpenAI, GitHub, etc.)
         foreach (static::$commonSecretPatterns as $patternName => $pattern) {
             try {
                 if ($patternName === 'private_key') {
@@ -148,16 +118,12 @@ class DlpMaskingService
                     }, $masked);
                 }
             } catch (\Throwable) {
-                // Ignore regex errors
             }
         }
 
         return $masked;
     }
 
-    /**
-     * Mask prompt content based on the violated policy detection type and pattern.
-     */
     protected static function maskUsingPolicy(string $prompt, DlpPolicy $policy): string
     {
         $pattern = trim($policy->pattern ?? '');
@@ -183,7 +149,6 @@ class DlpMaskingService
         }
 
         if ($type === 'keyword') {
-            // Split comma or newline delimited keywords
             $keywords = preg_split('/[,;\r\n]+/', $pattern);
             if (is_array($keywords)) {
                 foreach ($keywords as $keyword) {
@@ -196,7 +161,6 @@ class DlpMaskingService
                                 $prompt
                             );
                         } catch (\Throwable) {
-                            // Fallback
                         }
                     }
                 }
@@ -206,13 +170,8 @@ class DlpMaskingService
         return $prompt;
     }
 
-    /**
-     * When client sends an already-masked sample (e.g. AK****************LE),
-     * locate the corresponding cleartext secret in the prompt and replace it.
-     */
     protected static function replaceMaskedSampleInPrompt(string $prompt, string $maskedSample): string
     {
-        // Example masked sample: AK****************LE
         if (! preg_match('/^([^*]+)(\*+)([^*]+)$/', $maskedSample, $matches)) {
             return $prompt;
         }
@@ -222,7 +181,6 @@ class DlpMaskingService
         $suffix = $matches[3];
         $asteriskCount = strlen($asterisks);
 
-        // Regex looking for prefix + exact count of non-space chars + suffix
         $regex = '/\b'.preg_quote($prefix, '/').'[A-Za-z0-9_\-\.\/\+]{'.$asteriskCount.'}'.preg_quote($suffix, '/').'\b/';
 
         try {

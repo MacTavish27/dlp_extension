@@ -25,15 +25,14 @@ test('dlp incident api masks raw secret keys in both masked_sample and prompt_co
         'user_identifier' => 'developer_1',
         'domain' => 'chatgpt.com',
         'action_taken' => 'block',
-        'masked_sample' => $rawSecret, // Raw key passed as sample
-        'prompt_content' => $rawPrompt, // Raw prompt containing key
+        'masked_sample' => $rawSecret,
+        'prompt_content' => $rawPrompt,
     ]);
 
     $response->assertStatus(201);
 
     $incident = DlpIncident::latest()->first();
 
-    // The raw secret should NOT exist anywhere in the database record
     expect($incident->masked_sample)->not->toContain($rawSecret)
         ->and($incident->prompt_content)->not->toContain($rawSecret)
         ->and($incident->masked_sample)->toBe('AKIA**************LE')

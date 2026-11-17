@@ -64,7 +64,6 @@ class AdminPanelProvider extends PanelProvider
                     ->pluralLabel('Logs')
                     ->navigationGroup('System')
                     ->configureTableUsing(function (Table $table): Table {
-                        // 1. Format the event column with meaningful labels, colors, and icons
                         $eventColumn = $table->getColumn('event');
                         if ($eventColumn) {
                             $eventColumn
@@ -96,7 +95,6 @@ class AdminPanelProvider extends PanelProvider
                                 });
                         }
 
-                        // 2. Format subject column to show clean titles & human-readable model types
                         $subjectColumn = $table->getColumn('subject_type');
                         if ($subjectColumn) {
                             $subjectColumn
@@ -125,7 +123,6 @@ class AdminPanelProvider extends PanelProvider
                                 });
                         }
 
-                        // 3. Browser column displays the raw user agent string ($request->userAgent())
                         $browserColumn = $table->getColumn('properties.user_agent');
                         if ($browserColumn) {
                             $browserColumn
