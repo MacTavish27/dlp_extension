@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('dlp_incidents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('dlp_policy_id')->constrained()->cascadeOnDelete();
-            $table->string('user_identifier')->nullable(); 
-            $table->string('domain'); 
-            $table->string('action_taken'); 
-            $table->string('masked_sample')->nullable(); 
+            $table->string('user_identifier')->nullable();
+            $table->string('domain');
+            $table->string('action_taken');
+            $table->string('masked_sample')->nullable();
             $table->timestamp('occurred_at');
             $table->timestamps();
         });

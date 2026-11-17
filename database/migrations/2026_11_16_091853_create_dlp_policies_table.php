@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->enum('detection_type', ['regex', 'keyword', 'entropy'])->default('regex');
-            $table->text('pattern'); 
+            $table->text('pattern');
             $table->enum('action', ['log', 'warn', 'block', 'redact'])->default('block');
             $table->enum('severity', ['low', 'medium', 'high', 'critical'])->default('high');
             $table->json('target_domains')->nullable();

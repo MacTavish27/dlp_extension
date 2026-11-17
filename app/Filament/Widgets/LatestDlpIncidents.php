@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\DlpIncidents\Schemas\DlpIncidentInfolist;
 use App\Models\DlpIncident;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontFamily;
@@ -83,7 +84,7 @@ class LatestDlpIncidents extends TableWidget
             ->recordActions([
                 ViewAction::make()
                     ->slideOver()
-                    ->infolist(fn ($infolist) => \App\Filament\Resources\DlpIncidents\Schemas\DlpIncidentInfolist::configure($infolist)),
+                    ->infolist(fn ($infolist) => DlpIncidentInfolist::configure($infolist)),
             ])
             ->paginated([5, 10, 25]);
     }

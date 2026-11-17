@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\DlpPolicy;
 use App\Models\DlpIncident;
+use App\Models\DlpPolicy;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class DlpController extends Controller

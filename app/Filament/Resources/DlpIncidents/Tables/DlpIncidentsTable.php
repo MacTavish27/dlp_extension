@@ -48,7 +48,7 @@ class DlpIncidentsTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('Policy Deleted')
-                    ->description(fn (DlpIncident $record) => 'Type: ' . ($record->policy?->detection_type ?? 'N/A')),
+                    ->description(fn (DlpIncident $record) => 'Type: '.($record->policy?->detection_type ?? 'N/A')),
 
                 TextColumn::make('policy.severity')
                     ->label('Severity')

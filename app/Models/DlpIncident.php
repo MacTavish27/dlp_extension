@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use AlizHarb\ActivityLog\Contracts\HasActivityLogTitle;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class DlpIncident extends Model
+class DlpIncident extends Model implements HasActivityLogTitle
 {
     protected $fillable = [
         'dlp_policy_id',
@@ -26,5 +27,10 @@ class DlpIncident extends Model
     public function policy(): BelongsTo
     {
         return $this->belongsTo(DlpPolicy::class, 'dlp_policy_id');
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return "Incident #{$this->id} ({$this->domain})";
     }
 }

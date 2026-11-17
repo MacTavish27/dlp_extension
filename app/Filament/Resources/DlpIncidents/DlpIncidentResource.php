@@ -9,12 +9,12 @@ use App\Filament\Resources\DlpIncidents\Schemas\DlpIncidentInfolist;
 use App\Filament\Resources\DlpIncidents\Tables\DlpIncidentsTable;
 use App\Models\DlpIncident;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class DlpIncidentResource extends Resource
 {
@@ -45,6 +45,7 @@ class DlpIncidentResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $count = static::getModel()::count();
+
         return $count > 0 ? (string) $count : null;
     }
 

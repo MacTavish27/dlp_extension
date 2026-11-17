@@ -9,11 +9,11 @@ use App\Filament\Resources\DlpPolicies\Schemas\DlpPolicyForm;
 use App\Filament\Resources\DlpPolicies\Tables\DlpPoliciesTable;
 use App\Models\DlpPolicy;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class DlpPolicyResource extends Resource
 {
@@ -34,6 +34,7 @@ class DlpPolicyResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $count = static::getModel()::where('is_active', true)->count();
+
         return (string) $count;
     }
 

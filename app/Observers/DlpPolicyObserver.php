@@ -14,7 +14,7 @@ class DlpPolicyObserver
     private function invalidatePolicyCache(string $event, DlpPolicy $dlpPolicy): void
     {
         Cache::forget('active_dlp_policies');
-        $newVersion = md5(now()->toIso8601String() . '_' . $dlpPolicy->id);
+        $newVersion = md5(now()->toIso8601String().'_'.$dlpPolicy->id);
         Cache::forever('dlp_policies_cache_bust', $newVersion);
 
         Log::info("[DLP Observer] Policy {$event} (ID: {$dlpPolicy->id}, Name: '{$dlpPolicy->name}'). Cache cleared.");
